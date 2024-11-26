@@ -5,16 +5,12 @@
 #include <sMQTTBroker.h>          // sMQTTBroker Bibliothek
 #include <ArduinoJson.h>             // ArduinoJson Bibliothek
 #include <Wire.h>
-#ifdef LED_BUILTIN
-#undef LED_BUILTIN
-#endif
 #define LED_BUILTIN 18
 #define VBAT_PIN 1
 #define VBAT_READ_CNTRL_PIN 37 // Heltec GPIO to toggle VBatt read connection …
 // Also, take care NOT to have ADC read connection
 // in OPEN DRAIN when GPIO goes HIGH
 #define ADC_READ_STABILIZE 10 // in ms (delay from GPIO control and ADC connections times)
-
 // GNSS
 #define VEXT_CTL 3
 #define GPS_RX 33
@@ -26,11 +22,9 @@
 #define TFT_DC   40
 #define TFT_SCLK 41
 #define TFT_MOSI 42
-
 // Wifi
 #define WIFI_SSID     "ESP32_AP_"
 #define WIFI_PASSWORD "12345678"
-
 // MQTT
 #define MQTT_PORT      1883
 sMQTTBroker Broker;
@@ -43,26 +37,7 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RS
 
 void setup_gps() {
     Serial1.begin(115200, SERIAL_8N1, GPS_RX, GPS_TX);
-
 }
-void setup_wifi() {
-    Serial.print(F("[ESP32] Initialisiere WiFi ... "));
-  //WiFi init
-    WiFi.softAP((WIFI_SSID + chipID_str).c_str(), WIFI_PASSWORD);
-   Serial.print(F("Erfolgreich!\n"));
-
-}
-void setup_mqtt() {
-  //sMQTTbroker init
-    Serial.print(F("[ESP32] Initialisiere sMQTT ... "));
-    Broker.init(MQTT_PORT);
-   Serial.print(F("Erfolgreich!\n"));
-        //Json init
-}
-void setup_json() {
-        //Json init
-}
-
 void setup_tft() {
     pinMode(TFT_CS, OUTPUT);
     pinMode(TFT_RST, OUTPUT);
@@ -74,38 +49,43 @@ void setup_tft() {
     pinMode(TFT_LED, OUTPUT);
     digitalWrite(TFT_LED, HIGH);
 }
+void setup_wifi() {
+    Serial.print(F("[ESP32] Initialisiere WiFi ... "));
+    WiFi.softAP((WIFI_SSID + chipID_str).c_str(), WIFI_PASSWORD);
+   Serial.print(F("Erfolgreich!\n"));
 
+}
+void setup_mqtt() {
+    Serial.print(F("[ESP32] Initialisiere sMQTT ... "));
+    Broker.init(MQTT_PORT);
+   Serial.print(F("Erfolgreich!\n"));
+}
+void setup_json() {
+        //Json init
+}
 float readBatLevel() {
   int analogValue = analogRead(VBAT_PIN);
   float voltage = 0.0041 * analogValue;
   return voltage;
 }
-
-
-
 void setup() {
-        Serial.begin(9200);
+    Serial.begin(9200);
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, HIGH);
     pinMode(VEXT_CTL, OUTPUT);
     digitalWrite(VEXT_CTL, HIGH);
-
     setup_tft();
     setup_gps();
     setup_wifi();
     setup_mqtt();
     setup_json();
-  pinMode(VBAT_READ_CNTRL_PIN,OUTPUT);
-  digitalWrite(VBAT_READ_CNTRL_PIN, LOW);
-
+ // pinMode(VBAT_READ_CNTRL_PIN,OUTPUT);
+  //digitalWrite(VBAT_READ_CNTRL_PIN, LOW);
     tft.setCursor(0, 0);
     tft.print("GPS searching...");
     digitalWrite(LED_BUILTIN, LOW);
 }
-
 void loop() {
-
-
     if (gps.time.isUpdated()) {
         tft.setCursor(0, 0);
         tft.printf("%04u-%02u-%02u %02u:%02u:%02u",
@@ -117,14 +97,11 @@ void loop() {
         tft.setCursor(0, 12);
         tft.printf("Lat: % 3.6f\nLon: % 3.6f\n", gps.location.lat(), gps.location.lng());
     }
-
     if (gps.altitude.isUpdated()) {
         tft.setCursor(0, 28);
         tft.printf("Alt: %3.0fft ", gps.altitude.feet());
     }
-
     //digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-
     delay(1000);
     tft.setCursor(0, 0);
     tft.print("Device ID: ");
@@ -149,7 +126,4 @@ void loop() {
     tft.setCursor(0, 72);       
     tft.print("Bat: ");
     tft.print("4.21V       11:45 Uhr");
-
-
-
 }
