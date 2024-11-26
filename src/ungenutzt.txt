@@ -1,0 +1,45 @@
+// LoRa
+#define LORA_FRQ       868.0
+#define LORA_BDWTH     125.0
+#define LORA_SPRD      11
+#define LORA_CR        5
+#define LORA_SW        0xFF
+#define LORA_TXPWR     14
+#define LORA_PREA      8
+#define LORA_CRC       2
+#define LORA_DIO_1     14
+#define RADIO_NSS      8
+#define LORA_RESET     12
+#define LORA_BUSY      13
+#define LORA_CLK       9
+#define LORA_MISO      11
+#define LORA_MOSI      10
+int transmissionState = RADIOLIB_ERR_NONE; // transmission state
+volatile bool DatenEmpfangen = false;      // flag for LoRa reception
+
+
+void initStd() {
+    Serial.begin(9600);
+    Serial.println("[SX1262] Initialisiere LoRa...");
+    SPI.begin(LORA_CLK, LORA_MISO, LORA_MOSI, RADIO_NSS);
+    SX1262 radio = new Module(RADIO_NSS, LORA_DIO_1, LORA_RESET, LORA_BUSY);
+    int state = radio.begin(LORA_FRQ, LORA_BDWTH, LORA_SPRD, LORA_CR, LORA_SW, LORA_TXPWR, LORA_PREA);
+    radio.setCRC(LORA_CRC);
+    radio.setDio1Action(setFlag);
+
+    if (state == RADIOLIB_ERR_NONE) {
+        Serial.println("Erfolgreich!");
+    } else {
+        Serial.print("Fehlercode: ");
+        Serial.println(state);
+        while (true) delay(10);
+    }
+}
+
+void IRAM_ATTR setFlag() {
+    DatenEmpfangen = true;
+}
+    if (DatenEmpfangen) {
+        DatenEmpfangen = false;
+        Serial.println("Daten empfangen!");
+    }
