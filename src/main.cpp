@@ -1,4 +1,3 @@
-#include "setup.h"
 #include <Arduino.h>              // Arduino Bibliothek                 
 #include <Adafruit_ST7735.h>      // Adafruit ST7735 Bibliothek
 #include <TinyGPSPlus.h>          // TinyGPS++ Bibliothek
@@ -6,6 +5,10 @@
 #include <sMQTTBroker.h>          // sMQTTBroker Bibliothek
 #include <ArduinoJson.h>          // ArduinoJson Bibliothek
 #include <Wire.h>                 // Wire Bibliothek
+#include <string>
+#include "setup.h"
+#include "display_updates.h"
+
 
 void loop() {
     if (gps.time.isUpdated()) {
@@ -24,28 +27,10 @@ void loop() {
         tft.printf("Alt: %3.0fft ", gps.altitude.feet());
     }
     //digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(1000);
-    tft.setCursor(0, 0);
-    tft.print("Device ID: ");
-    tft.print(short_chipID_str);
-    tft.setCursor(0, 12);
-    tft.print("Distanz: ");
-    tft.setCursor(0, 24);
-    tft.print("--> ");
-    tft.print("ID: 9876");
-    tft.print("   730.2 M");
-    tft.setCursor(0, 36);
-    tft.print("--> ");
-    tft.print("ID: 4321");
-    tft.print("   3821.2 M");
-    tft.setCursor(0, 48);
-    tft.print("--> ");
-    tft.print("ID: 1234");
-    tft.print("   50.1 M");
-    tft.setCursor(0, 60);
-    tft.print("Satelitten: ");
-    tft.print(gps.satellites.value());
-    tft.setCursor(0, 72);       
-    tft.print("Bat: ");
-    tft.print("4.21V       11:45 Uhr");
+    display_update_device();
+    delay(5000);
+    display_search_lora_devices();
+    delay(5000);
+    display_update_distances("9876", 1123.45, "5432", 543.21);
+    delay(5000);
 }

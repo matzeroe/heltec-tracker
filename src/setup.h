@@ -28,7 +28,7 @@
 sMQTTBroker Broker;               // sMQTTBroker Instanz
 uint64_t chipid = ESP.getEfuseMac();         // MAC address (laenge: 6 bytes).
 String chipID_str = String(chipid, HEX);     // MAC address als String
-String short_chipID_str = chipID_str.substring(5);  // MAC address als String (nur die ersten 5 Zeichen)
+String short_chipID_str = chipID_str.substring(0,4);  // MAC address als String (nur die ersten 5 Zeichen)
 
 TinyGPSPlus gps;                  // TinyGPSPlus Instanz
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST); // Adafruit_ST7735 Instanz
@@ -39,14 +39,14 @@ void setup_gps() {          // GPS Initialisierung
 
 void setup_wifi() {        // WiFi Initialisierung
     Serial.print(F("[ESP32] Initialisiere WiFi ... "));
-    WiFi.softAP((WIFI_SSID + chipID_str).c_str(), WIFI_PASSWORD);
-   Serial.print(F("Erfolgreich!\n"));
+    WiFi.softAP((WIFI_SSID + short_chipID_str).c_str(), WIFI_PASSWORD);
+    Serial.print(F("Erfolgreich!\n"));
 
 }
 void setup_mqtt() {       // MQTT Initialisierung
     Serial.print(F("[ESP32] Initialisiere sMQTT ... "));
     Broker.init(MQTT_PORT);
-   Serial.print(F("Erfolgreich!\n"));
+    Serial.print(F("Erfolgreich!\n"));
 }
 void setup_json() {       
         //Json init
@@ -69,7 +69,9 @@ void setup_tft() {          // Display Initialisierung
     digitalWrite(TFT_LED, HIGH);
 }
 void setup() {         // Setup
-    Serial.begin(9200);
+    Serial.begin(115200, SERIAL_8N1);
+    Serial.println("[DEBUG] Serial Monitor gestartet...");
+
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, HIGH);
     pinMode(VEXT_CTL, OUTPUT);
